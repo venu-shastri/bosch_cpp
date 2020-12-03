@@ -1,0 +1,387 @@
+C++ training:
+
+//--- pre-processing directives - these statements must be handled or processed by the pre-processor utility.
+#include<stdio.h>
+#include<iostream>
+
+#define SIZE 10
+
+    C/C++
+       | <-- pre-processor [ A plain text substitution utility ]
+   Expanded C/C++ code
+       | <-- compiler [ object code - binary equivalent of the high-level code written by us]
+   OBJECT CODE [.o file or .obj file] 
+       | <-- link/build
+ .lib->|
+    EXECUTABLE FILE  [.out file or .exe file]
+***********************************************************************
+
+Example.cpp
+
+//GENERATE PRE-PROCESSSING CODE
+g++ -E Example.cpp   //generate the output on the console
+(or)
+g++ -E Example.cpp > Example.pre  //re-directs the pre-processor info to a file 'Example.pre'
+
+*******************************
+
+//GENERATE OBJECT CODE [compiling]
+
+g++ -c Example.cpp         // will generate Example.o
+
+********************************************
+//GENERATE AN EXECUTABLE [link/build]
+
+g++ Example.cpp -o Example.exe
+
+***************************************************
+
+GENERATE AN ASSEMBLY LISTING 
+
+g++ -S Example.cpp   // Example.s
+
+******************************************
+Executable files developed in C/C++ language is not portable across platforms....
+
+
+  | Header info |
+  |-------------|
+  | object code |
+  |-------------|
+  | .lib code   |
+
+The header-info which is the first few bytes of an executable, it's format changes with O/S
+
+MICROSOFT O/S   : PE format   [Portable executable file format]
+UNIX O/S        : COFF [Common object file format]
+LINUX O/S       : ELF [Executable linkable format]
+-------------------------------------------------------------------------
+MEMORY LAYOUT OF A PROCESS:-
+  
+  |--------------|
+  | code segment |
+  |--------------|
+  | data segment |
+  |--------------|
+  |   stack      |
+  |--------------|
+  |   heap       |
+  |--------------|
+
+code segment: Is the area of process memory that holds all code instructions...
+
+data segment: Is the area of process memory where all global variables, static variables and PHYSICAL (literals)     
+              const's would be residing.
+
+stack  : Is the area of process memory where all local variables and ACTIVATION records would be residing.
+
+heap : Is the area of process memory where dynamic memory allocation takes place...
+            
+--------------------------------------
+
+int a = 100;
+char* p ="Bosch";
+
+const int x = ...;
+
+
+a      -> is a variable of type 'int'
+100    -> is a numeric literal or physical const
+p      -> is a pointer variable
+Bosch  -> is a non-numeric literal or physical const
+x      -> is a logical const  [Any variable with an extended qualifier 'const' is a logical const]
+******************************************************************
+
+int z; // global variable
+
+int main()
+{
+  char* p1 ="Bosch";
+  char* p2 ="Bengaluru";
+  int x;
+  char *q = (char*) malloc(sizeof(char));
+  //..
+  free(q);
+  //..
+  char* p3 ="Bosch";
+  //...
+  const int y =300;
+  
+  char name[35] ="C++ programmer";
+}
+
+  |-----------------------------|
+  |          300                |   code segment
+  |                             |
+  |-----------------------------|
+  |r-write | read-only          |
+  |        | #65 Bosch          |  data segment
+  |z=0     | #89 Bengaluru      |
+  |        | #34 C++ programmer |
+  |-----------------------------|
+  |                             |
+  |  x=###                      |
+  |  y = 300                    |
+  |     p3=#65                  |
+  |     p2=#89                  |  stack
+  |     p1=#65                  |
+  |  q =NULL                    |
+  | name ="C++ programmer"      |
+  |-----------------------------|
+  |                             |  heap
+  |                             |
+  |-----------------------------|  
+
+
+The life-time of the information on data-segment, code-segment and stack area are automatic, they are not under the control of the programmer.
+
+data-segment and code-segment : Life-time is process life-time. Will only die or de-allocate when the process terminates.
+
+stack: Life-time of entities on stack is function's life-time.
+
+--------
+Heap is the only are of the process memory where the information's life-time is controlled by the programmer, with the help of certain functions like-- malloc/free and new /delete.
+------------------------------------------------------------------
+ACTIVATION RECORDS:-
+  Also called function stack-frame.
+  
+  
+  void Add(int, int);
+  
+  void main()   //CALLEE
+  {
+    //..
+    Add(10,20);   
+    //...
+  }
+  
+  void Add(int x, int y)   //CALLED
+  {
+    //..
+    //...
+  }
+  
+  |   10   |   <-- popped
+  |   20   |   <-- popped
+  |--------|   <--sp
+  | #500   |   <-- popped and would be assigned to bp
+  ----------   <-- bp
+  
+  
+PROLOG: Creation of a function stack-frame when the function executions starts, and pushes all the formal parameters of the function if any.
+  
+  BUSINESS-LOGIC: Execution of statements inside the function body.
+  
+  EPILOG: un-wind the stack-frame
+  
+  Note: PROLOG & EPILOG instructions are generated by the compiler automatically.
+  ********************************************************
+  CALLING CONVENTION:-
+    Is a feature applicable to functions or procedures and is language specific. These set or exhibit the rules for pushing the values onto the stack and stack unwinding.
+
+PASCAL : Supports a calling convention called __pascal.
+  - The pushing of the arguments onto the activation record is done from LEFT-TO-RIGHT order.
+  - The de-allocation of the CALLED functions stack-frame is the responsibility of the CALLED himself.
+  - Supports fixed-parameter design only.
+    
+C : Supports a calling convention called __cdecl.
+    
+      - The pushing of the arguments onto the activation record is done from RIGHT-TO-LEFT order.
+      - The de-allocation of the CALLED functions stack-frame is the responsibility of the CALLEE and not the CALLED.
+      - Supports both fixed-parameter design as well as variable parameter design.
+      
+      sig:  int printf(const char* p, ...);
+      
+      
+      void main()   //CALLEE
+      {
+      //CALLEE
+      printf("hello");
+      printf("a=%d,b=%d",a,b);   //CALLED
+      
+      }
+    
+----------------------------------------
+C++ supports several calling conventions...
+      a) __cdecl   b) __stdcall   c)__thiscall   d) __fastcall
+    
+    
+__stdcall: Also called standard call calling convention, it is a hybrid feature of both __cdecl and __pascal conventions.
+
+  [borrowed from __cdecl]
+        - The pushing of the arguments onto the activation record is done from RIGHT-TO-LEFT order.
+  [borrowed from __pascal]
+     - The de-allocation of the CALLED functions stack-frame is the responsibility of the CALLED himself.
+     - Supports fixed-parameter design only. 
+    
+
+MICROSOFT C++ COMPILER:-
+
+void __cdecl Add(int, int);
+
+void __cdecl Add(int x, int y){....}
+
+--------------------
+G++ compiler
+
+void Add(int, int) __attribute__ ((cdecl));
+
+void Add(int x, int y){  }
+
+ ---------------------
+ __thiscall : It is a calling convention specific to C++, applicable to class member functions only.
+ 
+ ---------------------------
+ C - structured programming language.
+ 
+ void fun1();
+ void fun2();
+ void fun3();
+ //...
+ 
+ int main()
+ {
+   fun1();  //added statement to branch control to 'fun1'
+   fun2();  //added statement to branch control to 'fun2'
+   fun3();  //added statement to branch control to 'fun3'
+   //...
+ }
+ 
+ void fun1()
+ { 
+   //..
+ }
+ void fun2()
+ { 
+   //..
+ }
+ void fun3(){ }
+ ***************************************************************
+ Why C++ or object oriented approach:-
+    It should be possible for us to give cost-effective solution and time-bound delivery of products or systems whose needs keep growing or changing rapidly over-time.
+    
+**********************************************************************
+C++ as an OO language supports 4 broad pillars:
+
+- POLYMORPHISM
+      - compile-time, early binding or static binding
+      - run-time, late binding or dynamic binding
+- ENCAPSULATION
+- INHERITANCE
+- ABSTRACTION
+
+-----------------------------------
+FUNCTION OVERLOADING in C++
+
+------------------
+NAMING CONVENTION:
+  By default every function in C++ code except 'main' will get decorated, no matter we overload them or not. This default feature is also called "C++ naming convention".
+  
+  C++ naming convention facilitates decoration, thereby supports overloading...
+  C naming convention does not facilitate decoration, thereby does not support overloading.
+  
+  //OK
+  extern "C++" void fun();          __Z3funv
+  extern "C++" void fun(int);       __Z3funi
+  
+  //OK
+  extern "C++" void fun();         __Z3funv
+  extern "C" void fun(int);        __fun
+  
+  
+  //ERROR
+  extern "C" void fun();          __fun
+  extern "C" void fun(int);       __fun
+  --------------------------------------------------
+  HEADER FILE
+
+extern "C"
+{  
+void fun1();
+void fun2();
+void fun3();
+  //..
+}
+  
+  .CPP FILE 
+  
+extern "C"
+{  
+void fun1(){ }
+void fun2(){ }
+void fun3(){ }
+  //...
+}
+
+*************************************
+INLINE FUNCTION
+
+  A request made to the compiler to substitute the business-logic of the function in the place call, thus enhancing execution speed of the application, but on the contrary it would increase the size of the exe file.
+  
+  
+ PROLOG - 2 ms
+ B.LOGIC - 1 ms
+ EPILOG  - 2 ms
+     Total 5 ms
+****************************************
+DEFAULT ARGUMENTS:
+  Arguments to be considered by the function automatically if in-case the consumer does not provide the necessary input(s).
+  
+  
+************************************************
+METAPROGRAMMING:
+  Writing code to generate code.
+  A very powerful feature in C++, A useful language feature that can be used when business remains the same irrespective of the data-type.
+  Can be realized with the help of TEMPLATES.
+      - function templates
+      - class templates
+ -------------------------------------------------------
+ Develop a function by the name 'Add', that shall take 2 inputs, both integers and find their sum.
+ 
+   The problem as such,has not spelt which 2 integers, for which we programmers are assuming an algebraic name.
+ 
+ void Add(int x, int y)
+ {
+    //...
+ }    
+
+**************************************
+Develop a function by the name 'Add', that shall take 2 inputs, both numerics and find their sum.
+
+  - The values have gone missing, also
+  - The exact data-type also has gone missing.
+  
+template<typename T> void Add(T x, T y)
+{
+  //....
+}
+     
+
+
+   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+    
+    
+    
+    
+
+
+
+
+   
