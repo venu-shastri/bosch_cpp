@@ -1,0 +1,787 @@
+Default args. (continued...)
+
+----------------------
+INLINE FUNCTION:-
+
+	- A request made to the compiler, such that it substitutes the actual business-logic instructions in the place of call, so we avoid PROLOG & EPILOG overhead instructions to the CPU, this approach would enhance execution speed, but would be a trade-off with the size of the EXE file.
+
+Differences between A macro and inline function:
+
+MACRO's : - The substitution of a macro takes place by the pre-processor utility well before compilation starts...
+	  - The macro substitution is guaranteed to happen
+          - And it is a blind substitution, there is no strong type checking...
+
+INLINE function:
+	- The substitution of the business-logic of the function in the place of call, is made during compilation by the compiler.
+	- This substitution may or may not happen, it is at the sole discretion of the compiler's wisdom.
+	- There is a strong type checking...
+
+
+
+PROLOG  - 2 MS
+B.LOGIC - 1 MS
+EPILOG  - 2 MS
+          ----
+          5 MS
+
+----------------------------------------------------------
+METAPROGRAMMING:-
+	Writing code to generate code, A very powerful language feature in C++. Can be realized with the help of GENERIC or TEMPLATE programming...
+
+	Develop a function that shall take 2 inputs, both shall be integers and find their sum.
+
+	void Add(int num1, int num2){...}
+
+	Develop a function that shall take 2 inputs, both shall be numbers and find their sum.
+
+	Earlier we assumed algebraic names for the 2 unknown values as 'num1' and 'num2'. 
+        Now we wish assume albegraic names for the unknown data-types as well....
+	For which we need design the function as a template....
+
+	template<typename T> void Add(T num1, T num2) {...}
+
+ 
+	Note: A generic or template code is never part of a binary file (OBJ or EXE).
+	      As a library vendor we cannot ship a generic or template code in a pre-compiled form. Can only shipped as 
+              text file with .H or .CPP as extensions.
+
+	A function template is not a substitute for function overloading...
+
+	Function template when ?
+		The business-logic of the function remains the same, no matter what the input data-type is.
+
+	Function overloading when?
+		The business-logic keeps changing with change in input data-types...
+
+IMPLICIT INSTANTIATION:
+	Based on the input data-types, the compiler would be in a position to infer as to what data-type a typename in the generic code stands-for, and accordingly instantiate the code.
+
+EXPLICIT INSTANTIATION:
+	The generic code consumer, has to assist the compiler in resolving a particular typename while calling the function.
+
+          
+---------------------------------------------------
+REFERENCE TYPES IN C++:
+
+C language : A variable is broadly 2 kinds
+		- VALUE TYPE    [hold values]
+		- POINTER TYPE  [hold addresses]
+
+
+C++ language : A variable is broadly 3 kinds
+		- VALUE TYPE    [hold values]
+		- POINTER TYPE  [hold addresses]
+		- REFERENCE TYPE [act's as alias]
+
+
+VALUE TYPE DECLARATION:
+	int a = 100;
+
+POINTER TYPE DECLARATION:
+	int* p = &a;
+
+REFERENCE TYPE DECLARATION:
+	int& q = a;    // 'q' is another name for 'a'
+
+     H03B             H042B
+   |-----|          |-----|
+   |  a  |          |  *p | 
+   |-----|          |-----| 
+   | 100 |          | H03B|
+   |-----|          |-----|
+   |  q  |
+   |-----|
+------------------------------------------
+	A reference type must be aliased at the point of declaration itself..
+		For eg:
+			int a;
+			int &ref = a;
+
+		But, the foll: is not logically equivalent to the one above...
+			int a;
+			int &ref;   //ERROR
+			ref = a;
+*****************
+In C++98 We cannot have an array of reference types nor carry out indexing with reference types..
+
+*****************************
+CONST CORRECTNESS:
+
+int &ref = 100;       //ERROR
+const int &ref = 100;  //OK
+
+****************************************
+SCENARIOS WHERE POINTER TYPES ARE COMPULSORY:-
+
+	- Passing of arrays as function parameters can only be done with pointers...
+	- Dynamic memory allocation
+  - Extending the scope of a local variable in a function
+
+int a;
+int &ref = a;
+    |
+    |  compiler would internally translate it
+    v  like this....
+
+int* const ref = &a;
+
+
+void swap2(int& p, int &q)  // int* const p =&a;   int* const q =&b;
+{
+  int temp = p;       // int temp = *p;
+  p = q;              // *p = *q
+  q = temp;           // *q = temp;
+}
+------------------------------------------
+int a = 100;
+const int* p = &a;         // 'p' is a pointer to a const integer, with 'p' has a handle the value or memory      
+                               pointed by 'p'can only READ and not MODIFIED (NO WRITE)
+cout << *p;    //READING -ok
+*p = 200;      //WRITING - error
+
+int b =200;
+p = &b;        // 'p' ADDRESS CONTENT IS MODIFIABLE
+cout << *p ;   //OK
+*p = 300;      //ERROR
+
+	Conclusion: On pointer 'p' we can READ as well as WRITE, But to the memory pointed by 'p' we can only do a READ.
+--------------------------------------------
+
+int a= 100;
+int* const p;             //ERROR - 'p' shall serve as a pointer to a READ-WRITE integer, by himself 'const'
+int* const p = &a;        //OK - 'p' is BOUND POINTER, thru out its life-time will only point to 'a'
+
+	On pointer 'p' we can only do a READ, where as to the memory pointed to by 'p' we can do both READ as well as WRITE
+
+cout << *p;   // READ the memory pointed to by 'p'
+*p = 200;     //OK, modify the value in the memory pointed to by 'p'
+
+int b;
+p = &b;   //ERROR, cannot modify the contents of 'p'
+---------------------------------
+int a= 100;
+const int* const p = &a;   // BOTH pointer 'p' as well as the memory pointed to by 'p' are READ-ONLY
+
+cout << *p;   //ok
+*p = 200;     //ERROR
+
+int b;
+p = &b;   // ERROR
+
+----------------------------------------------------
+
+ENCAPSULATION:-
+
+C (structured approach) - FUNCTION CENTRIC approach:-
+		- The language scheme of things is such that, it lays more emphasis on function's and cares less for the data.
+
+C++ (OO approach) - DATA CENTRIC approach:-
+	- Here the language scheme of things is such that, it lays more emphasis on data and cares less for the functions.
+
+------------------
+struct EMPLOYEE
+{
+  int emp_id;
+  char empname[25];
+  float salary;
+};
+
+struct STUDENT
+{
+  int stdid;
+  char sname[25];
+  float marks;
+};
+
+struct EMPLOYEE E1;  //structure variables...
+struct STUDENT S1;
+
+//...
+//...
+
+S1.marks = E1.salary;
+-----------------------------------
+
+Extended struct in C++:-
+
+struct STUDENT
+{
+  // data members (or) attributes
+  int stdid;
+  char sname[25];
+  float marks;
+  
+  //member functions (or) methods (or) behaviours
+  void input(){ ... }
+  void print(){ ... }
+};	
+
+In C
+struct STUDENT S1;    // A structure variable - has only STATE, does not have proper BEHAVIOUR
+
+In C++
+STUDENT S1;   // An object, An instance that apart from having a STATE, also has a well-defined BEHAVIOUR
+-----------------------------------
+Differences between a C struct and a C++ extended struct:
+
+C struct:
+	- Can only variables (value or pointer type) as its member
+	- No member can be qualified with an extended qualifier like 'const', 'static etc.,
+	- No support for access-specifiers.
+	- It cannot be empty either.
+
+C++ extended struct:
+	- Can have both variables as well as functions as its member
+	- Any member can be qualified with an extended qualifier like 'const', 'static' etc.,
+	- The declaration can be empty;
+	- Does provide support for access-specifiers viz.. private, public & protected.
+		private: Member's under this access-specifier are accessible only inside the struct/class
+                         plan.
+
+		public: Member's are acessible everywhere...
+
+		protected: Member's are accessible inside the struct/class plan and across derived class only.
+
+----------------------------------------------
+C++ object model:
+	Also called BJARNE model, is influenced by the sum total of all non-static data members of the struct/class plan.
+	Functions are a single copy on the code-segment, and every object of the struct/class plan would the share the same.
+
+	Since the function is only one copy, no matter how many objects we create, the link between the functions and object is actually known only with their addresses and not by their identity.
+
+
+class CA
+{
+private:
+  int a,b;
+public:
+  void input(){ }
+  void print() { }
+};
+
+void main()
+{
+   CA obj1, obj2, obj3;   //These instances will get created on the STACK area of the process memory.
+}
+
+|---------------
+|  code seg,
+|
+|  void input(){ }
+|  void print(){ }
+|-------------------
+|    data seg
+|---------------------
+|    stack
+|
+|  obj3
+|  obj2
+|  obj1
+|-----------------------
+
+
+ obj1                 obj2                  obj3
+--------|          --------|             --------|
+a |     |          a |     |             a |     |
+--------|          --------|             --------|
+b |     |          b |     |             b |     |
+--------|          --------|             --------|
+
+ #H80               #H90                    #H98        
+                      ^
+   ^                  |<-- this--input();
+   |                         obj2.input();
+   |----this---<--input();
+          obj1.input();                
+                                        obj3.input();
+	The actual link between the objects and its member functions take place in-directly with help of special link field called 'this' pointer
+
+**********************************
+class CA
+{
+private:
+  //..
+public:
+  void input(int x, int y)     // void input(CA* const this, int x, int y)
+  { 
+    //...
+    CA obj2;
+    this = &obj2;  //ERROR
+  }
+};
+
+
+CA obj1;
+obj1.input(10,20);    // CA::input(&obj1, 10,20);
+
+	Every member function of a class (Except static member functions) have a hidden formal parameter called 'this' pointer.
+	The 'this' pointer is the one that actually holds the address of the object which invoked the member function..
+	The life-time of 'this' element is life-time of the class member function. And he would be the top-most of class member functions activation record.
+
+	CA* const this  implies ===> The pointer 'this' is a pointer to a read-write CA kind, but by himself he is read-only.
+	************************************************************************
+CA global_obj;    // 1st object
+
+void fun()
+{
+   CA local_obj;    //2nd object
+   
+   CA* p = new CA;   //3rd object
+}
+
+|----------------------------
+|  code seg,
+|
+|  void input(){ }
+|  void print(){ }
+|--------------------------------
+|    data seg
+|
+|  [global_obj]
+|
+|---------------------------------
+|    stack
+|
+|  [local_obj]
+|  
+|   [*p](#456)
+|----------------------------------
+| heap
+|    #456
+|    |a   |b  |   (CA instance)
+|--------------------------
+
+
+
+
+
+
+***************************************************
+CONSTRUCTORS & DESTRUCTOR methods:-
+	
+
+	- Constructor's create object
+	- Constructor's initialize object
+	- There is a built-in default constructor for every class
+
+   None of the above claims are true. They are factually in-correct.
+******************************************************
+CONSTRUCTORS:-
+	- These are special member functions, if present in the class - would get automatically called by an object, which is under creation/definition or construction. Hence the name CONSTRUCTOR.
+
+	- These member function's take the same name as that of the class.
+
+	- They can be overloaded
+
+	- These methods do not return any value.
+
+USAGE: If there is any important business which we wish to accomplish at the time of object creation or construction phase, then such businesses can be employed in the constructor methods.
+
+
+DESTRUCTOR:-
+	- This method is also a special method, if present in the class - would get automatically called when an object
+          is under destruction or dying. Hence the name DESTRUCTOR.
+
+	- This method also takes the same name as that of the class, but prefixed with '~' (tilde) symbol.
+
+	- Unlike constructors, the destructor method cannot be overloaded.
+
+	- This method also does not return any value.
+
+USAGE: If there is any important business that we wish to accomplish on an object at the time of its dying or destruction,  then such businesses can be employed in the destructor method.
+
+Note: Constructors/destructor methods are not compulsory for every class. They are purely need based.
+*******************************
+CA obj1, obj2, obj3;
+
+| obj3 |
+| obj2 |
+| obj1 |
+|------|
+*************************************
+
+class Database
+{
+private:
+   //...
+public:
+  void Connect(){ }    //helps establish database connectivity
+  void Query(){ }      //helps in querying the database
+  void Disconnect(){ } //helps in saving the changes if any, and closes the database connection
+  //..
+};
+
+
+class Database
+{
+private:
+   //...
+public:
+  Database(){ }        //helps establish database connectivity
+  void Query(){ }      //helps in querying the database
+  ~Database(){ }       //helps in saving the changes if any, and closes the database connection
+  //..
+};
+
+----------------------------------------------------
+Prefer initialization over assignment:
+	This approach is strongly recommended for class objects.
+
+For eg:
+
+//approach-1
+
+int a = 100;      //initialization
+
+                        |------|
+                        |  a   |
+                        |------|
+                        | 100  |
+                        |------|
+
+****************
+
+//approach-2
+
+int a;
+//..
+a = 100;   //over-writing the previous (garbage) - ASSIGNMENT
+
+                         step 1                step 2  
+                        |------|              |------|
+                        |  a   |              |  a   |
+                        |------|              |------|
+                        |  ### |              |  100 | 
+                        |------|              |------| 
+
+
+************************************
+Only initialization would work and not assignment:-
+
+//approach-1
+
+const int a = 100;      //initialization  -- WILL COMPILE
+
+                        |------|
+                        |  a   | const
+                        |------|
+                        | 100  |
+                        |------|
+
+****************
+
+//approach-2
+
+const int a;     //ERROR
+//..
+a = 100;         //ERROR  --ASSIGNMENT DOES NOT WORK
+
+
+	- Any business attempted on an object's data during the BUSINESS-LOGIC phase of a constructor call, is rather
+          an ASSIGNMENT and not true INITIALIZATION.
+
+During the PROLOG PHASE of a constructor call, the state of the objects would resemble as follows:-
+
+ obj1               
+--------|         
+a |  #  |          
+--------|         
+b | (#) |        ==> ()  means 'const'     
+--------|         
+
+ #H80               
+
+During the BUSINESS-LOGIC PHASE, the state of the object
+
+this->a = 0
+this->b = 0   <-- error, cannot assign, as 'const' has already impacted 'b'
+                        
+obj1               
+--------|         
+a |  0  |          
+--------|         
+b | (#) |        ==> ()  means 'const'     
+--------|         
+
+ #H80              
+
+	- In order to achieve true INITIALIZATION on an object's data, the same must be attempted during
+          the PROLOG phase of the constructor call itself.
+
+	- Since the compiler generates PROLOG code and not the programmer, The programmer has to 
+          hint the compiler in-directly to achieve the business on const data member during the PROLOG
+          phase itself. This is possible with the help of a language construct called...
+                "constructor initialization list".
+
+WITH INITIALIZATION LIST:
+
+During the PROLOG PHASE of a constructor call, the state of the objects would resemble as follows:-
+
+ obj1               
+--------|         
+a |  #  |          
+--------|         
+b | (0) |        ==> ()  means 'const'     
+--------|         
+
+ #H80               
+
+During the BUSINESS-LOGIC PHASE, the state of the object
+
+this->a = 0
+
+                        
+obj1               
+--------|         
+a |  0  |          
+--------|         
+b | (0) |        ==> ()  means 'const'     
+--------|         
+
+ #H80              
+********************************
+COPY CONSTRUCTOR:
+	A constructor which takes a single parameter of its own kind by reference only. If this constructor is not defined in the class, and yet the class consumer happens copy construct objects of this class, then the compiler would generate a copy constructor and this method will be automatically inlined.
+
+	The compiler generated copy constructor business is also called bit-wise copy or member to member copy.
+	For eg:
+                       CA obj2(obj1);
+		
+                       obj2.a = obj1.a
+                       obj2.b = obj1.b....
+
+class CA
+{
+public:
+  //..
+  CA(CA &x);   //copy constructor
+  CA(CA *x);   //parameterized constructor, that  takes a pointer to CA object as handle
+  CA(CA x);    //A constructor taking an object of its own kind by value - is not permitted.  -- ERROR
+};
+
+
+//traditionally A constructor with an object of it's own kind as a parameter by value was permitted.
+
+class CA
+{
+public:
+  //..
+  CA(CA x)     ===> CA x(obj1)  --> x.CA::CA(obj1) ==> will be a call to compiler generated copy constructor
+           // No copy constructor in the class, but a constructor taking an object of its own kind by value is present....
+  {...}
+};
+
+
+CA obj1;
+CA obj2(obj1);
+       --> obj2.CA::CA(obj1)  
+----------------------------------------------------
+If one arg. constructors are not explicit
+
+class CA
+{
+public:
+  CA(int);
+  CA(CA &x);
+};
+
+//--consumer code---
+CA obj1=100;   //ok, will call one arg. constructor
+CA obj2(100);  //ok, will call one arg. constructor
+
+CA obj3 = obj1; //ok, will call copy constructor
+CA obj4(obj1);  //ok, will call copy constructor
+*****************************
+If one arg. constructors are explicit
+
+class CA
+{
+public:
+  explicit CA(int);
+  explicit CA(CA &x);
+};
+
+//--consumer code---
+CA obj1=100;   //error
+CA obj2(100);  //ok, will call one arg. constructor
+
+CA obj3 = obj1; //error
+CA obj4(obj1);  //ok, will call copy constructor
+
+
+
+
+
+
+
+
+
+
+---------------------
+CONST OBJECTS, CONST METHODS AND CONST CORRECTNESS:
+
+	- A const object will only call const methods...
+
+
+//--------------------------------
+
+int a;       &a  ==> int*  - pointer to a read-write integer
+
+const int a=100; &a ==> const int*  - pointer to a read-only integer
+
+CA obj1;    &obj1  ==> CA*  - pointer to a read-write CA kind
+
+const CA obj1;  &obj1 ==> const CA*  - pointer to a read-only CA kind
+
+//-----------------------------
+
+
+class CA
+{
+public:
+  //..
+  void print();      // void print(CA* const this);    --> 'this' is a pointer to read-write CA kind
+};
+
+CA obj1;
+obj1.print();    // CA::print(&obj1);    --> CA::print(CA* );   // OK COMPILES
+
+const CA obj1;
+obj1.print();    // CA::print(&obj1);    --> CA::print(const CA* );   // ERROR
+
+**************************
+
+class CA
+{
+public:
+  //..
+  //const method or const member function
+  void print() const;      // void print(const CA* const this);    --> 'this' is a pointer to read-only CA kind
+};
+
+RULES FOR CONSIDERING A MEMBER FUNCTION TO BE 'const':-
+
+	- The member function should strictly be doing a read-only business on the objects data, only then
+          the member function is entitled to be qualified as 'const'
+If any member function of our class is only doing read-only business, then it is a good idea to qualify such a member function as 'const'.
+
+	- A const object will only call const methods...
+	- An object that isn't const, can call either of the methods, whether const or not a const.
+	- We cannot modify the object's data inside a const method.
+	- Qualifying a member function as 'const' is only applicable for those methods which do a read-only business on
+          the objects data.
+	- The qualifier 'const' on the RHS of class member function is not applicable for constructors/destructor methods.
+		Reason:
+			- The actual effect of the 'const' qualifier on an object, only takes place after the EPILOG phase of the constructor call, and the same neutralized or removed during the PROLOG phase of the destructor call.
+
+**************************
+
+class CA
+{
+public:
+  //...
+  CA(CA& x);     // CA& x  --> x shall act as an alias to a read-write CA kind
+
+  CA(const CA& x);     // const CA& x  --> x shall act as an alias to a read-only CA kind
+};
+
+const CA obj2(20,30);   //READ-ONLY OBJECT
+
+CA obj3(obj2);
+
+-----------------------------------------------
+
+class CB
+{
+public:
+  //...
+  void compute(CA obj)    
+  {
+    //...      //on the parameter 'obj' received, the function does a WRITE operation
+  }
+};
+
+class CB
+{
+public:
+  //...
+  void compute(const CA obj)    
+  {
+    //...      //on the parameter 'obj' received, the function does a READ-ONLY operation
+  }
+};
+--------------------------------------------------------
+MUTABLE MEMBERS:-
+	A qualifier that is applicable only to class data members. By qualifying the data members as mutable, these members can still be modified though the object is const.
+
+
+class Screen
+{
+private:
+  int rows, columns;
+  mutable int curR, curC;
+public:
+  //...
+};
+
+
+
+//dos user (purely text based interface O/S)
+const Screen s1(25,80,1,1);
+
+
+
+
+//windows user   (purely gui based interfac O/S
+
+Screen s2(35,90,1,1);
+----------------------------------------------------------------------
+STATIC DATA & STATIC METHODS:-
+
+
+|----------------------------
+|  code seg,
+|
+|  
+|  void print(){ }
+|--------------------------------
+|    data seg
+|
+|        CA::b
+|       |  3  |
+|---------------------------------
+|    stack
+|
+|   obj1      obj2       obj3
+|  |a:100|  | a:200|   |a:300 |
+|   
+|----------------------------------
+| heap
+|    
+|    
+|----------------------------------
+
+  If class comprises of one or more static data members, then the objects under construction will not take any responsibility of allocating memory for the static data members.
+  In order to overcome such issues, it is the responsibility of the class author or programmer to define memory for the static data member(s) in the global scope, immediately foll: the class declaration.
+  
+    A member function that deals only with static data can be qualified to be 'static'
+    By doing so, we can such member functions directly without an object.
+    Static member functions do not support 'this' pointer.
+    
+ class CA
+ {
+ public:
+   void count();   // void count(CA* const this);
+ };
+
+class CA
+ {
+ public:
+   static void count();   // void count();
+ };
+
+
+
+
+
+
