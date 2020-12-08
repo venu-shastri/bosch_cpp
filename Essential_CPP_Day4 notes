@@ -1,0 +1,623 @@
+STL LIBRARY:- 
+	- The complete library is not pre-compiled rather GENERIC or template code. 
+	- This library broadly or extensively uses some of the best language and design feature's of C++.
+		- Generic or metaprogramming
+		- Operator overloading
+		- Smartpointer technique
+		- Function objects and Functors..
+		- PIMPL model
+		- RAII model
+
+	The standard template library broadly consists of...
+	1) CONTAINER CLASSES
+	2) ITERATOR CLASSES
+	3) ALLOCATOR CLASSES
+	4) ALGORITHMS
+
+
+1) CONTAINER CLASSES:
+	These are generic classes which exhibit HAS-A relationship, they help the class consumer in containing data or info of their choice in a certain mathematical order as wished.
+	All the data or info populated into these container classes objects are held or managed automatically on the HEAP.
+	These contained information get de-allocated automatically when the container class object dies. In other words all these classes extensively use PIMPL and RAII model.
+
+	The container classes are broadly 2 kinds...
+	a) sequence containers: Eg: stack, queue, list, vector etc.,
+	b) associative containers: eg: map, multimap, pair etc., [These help in holding values in pairs i.e. KEY-VALUE relationship]
+
+2) ITERATOR CLASSES:
+	Objects of these class act as pointer's to the elements or info held inside a container class object, they help us retreive a value or help us traverse the values in the said mathematical model.
+
+3) ALLOCATOR CLASS:
+	All container classes in-order manage the heap (allocate/de-allocate) for the values populated into their container class object use allocator class instance for the same.
+
+4) ALGORITHMS:
+	These are global utility functions, designed to work on a collection of values (having starting address and ending address) and help the programmer to carry out certain custom business operations on a given mathematical model for which there is no suitable member function in the container class.
+
+---------------------------------------------------------------------
+template<typename T1, typename T2=Allocator<T1>> class list
+{
+private:
+   //...
+   T1 data;
+   T2 mem;
+}
+
+list<int> ls1;
+
+	The above generic class instantiation would be as follows:-
+
+
+template<int, typename T2=Allocator<int>> class list
+{
+private:
+   //...
+   int data;   
+   Allocator<int> mem;
+}
+
+----------------------------------------------------------------------
+template<typename T1, typename T2=Allocator<T1>> class list
+{
+   friend class iterator;
+private:
+   //..
+public:
+   //..
+
+    /*
+       The class iterator whose declaration is scoped in the generic class list
+	- Is not a generic class
+	- By scoping its declaration inside, it is infered this iterator class uses an algorithm to iterate a list
+          mathematical model
+        - In-order to iterate the list structure, the member functions of the iterator class must have access to
+          the private data of list class, thereby the 'iterator' class is qualified as its friend.
+	- Though the iterator class is not a template or generic code, it can still understand or resolve the generic types
+          viz.. T1, T2 etc of the list class because the declaration is scoped in the generic list class.
+
+    */
+   class iterator
+   {
+      private:
+         //..
+      public:
+         //..
+   };
+};
+
+list<int> ls1;
+list<int>::iterator itr;
+
+
+
+template<typename T> class MyAllocator
+{
+private:
+  //..
+public:
+   T* allocate(size_t size){...} //custom algorithm for allocation here
+   void deallocate(...){... } //custom algorithm for de-allocation here
+   //..
+};
+
+list<int, MyAllocator<int>> ls1;
+
+--------------------------------------------------------
+
+//global function
+
+bool Ascending(int &x, int &y)   //A functor whose return type is 'bool' is also called a predicate function
+	{
+		if(x < y)
+			return true;
+		else
+			return false;
+	}
+
+
+bool Descending(int &x, int &y)   //A functor whose return type is 'bool' is also called a predicate function
+	{
+		if(x > y)
+			return true;
+		else
+			return false;
+	}
+
+sort(v1.begin(), v1.end(),Ascending);
+
+sort(v1.begin(), v1.end(),Ascending);
+-----------------------------------------------------
+FUNCTORS ...(contd..):-
+
+	The only member function any algorithm from STL can bind or link to directly is 'FUNCTOR' and no other member function.
+----------------------------------------------
+INHERITANCE:
+	Inheritance is the very essence of IS-A relationship. Fundamental towards realizing the object orientied principles (SOLID) viz...
+
+S - Single responsibility principle
+O - Open-Closed principle
+L - Liskov Substitution principle
+I - Interface segregation principle
+D - Dependency inversion principle
+--------------------------------------------
+L - Liskov Substitution principle:  The DERIVED class must be a direct substitute of the BASE kind. [In esssence whatever a BASE class instance is capable, so should be the DERIVED class instance].
+
+	In the context of inheritance for IS-A relationship to truly meaning-full it should be possible for a 
+	- BASE class reference type to also act as an alias to a DERIVED kind,
+	- BASE class pointer type to also hold the address of a DERIVED kind....
+
+---------------------
+
+O - Open-Closed principle: A time-tested code should be OPEN for new extensions, but CLOSED to changes to himself.
+
+C++ supports various model's of inheritance
+
+- Single level - by far the simplest one
+- Multi-level
+- One-to-many  [More than one DERIVED class, all of them having a common BASE class]
+- Many-to-one  [More than one BASE class, and single DERIVED class] , A model specific to C++ language
+- HYBRID inheritance  [combination of one-To-many and many-To-one] ,A model specific to C++ language
+
+**************************
+	A derived class instance or object construction will always be in total, that is all data members of the base class plus all data members of the derived class if any, constitute the derived class object. It does not matter, which access-specifier we use at the time of inheriting or deriving the class.
+
+DEFAULT CONSTRUCTOR SYNTHESIS BY THE COMPILER :
+
+	There are only 4 specific scenario's where a compiler would assume a default constructor, if in-case the programmer does not provide any constructor in the class at all.
+
+	Scenario -1 : Virtual inheritance (hybrid inheritance model)
+	
+	Scenario -2 : CONTAINMENT or HAS-A relationship, The container class does not have any constructor, where as the contained element belongs to a class have a default constructor, then the compiler would assume one for the container class well.
+
+	Scenario -3: Inheritance or IS-A realtionship, If the BASE class has a default constructor and nothing in the DERIVED, then the compiler would assume one for the DERIVED class.
+
+		- Nothing in the BASE class or DERIVED class, then compiler will never assume any constructor method's for either classes.
+		- No default constructor in the BASE class, but if there is any default constructor in the DERIVED, even then the compiler wll not assume any default constructor for the BASE class.
+
+
+	Scenario -4: If the class is POLYMORPHIC by nature, and such class is not provided with any constructors, then the compiler would assume a default constructor for such a class.
+
+***********************************************************************
+PUBLICIZER TECHNIQUE (Vertical-Access technique):-
+	This technique serves dual purpose:
+		- Expose any hidden member (or)
+		- Hide an Exposed member...
+	across a inheritance tree..
+
+
+class CA
+{
+public:
+
+  void fun(){...}
+  void fun(int x){...}
+};
+
+
+**********************
+class CA
+{
+public:
+  void fun1();
+  void fun2();
+  void fun3();
+  //..
+};
+
+//Expose 'fun1' alone and HIDE all others...
+
+class CB:private CA
+{
+public:
+   CA::fun1;    //EXPOSE 'fun1' ALONE & HIDE all others
+};
+
+
+class CC:public CA
+{
+private:
+   CA::fun1;    //HIDE 'fun1' ALONE & EXPOSE all others
+};
+-----------------------------------------
+Design technique's with regard to non-polymorphic classes:-
+
+
+Design a class such that it's instances are not allowed, but the class can only be derived.
+
+class CA
+{
+protected:
+  // Declare/define the constructor method(s) under protected access-specifier.
+  CA();    
+  //...
+};
+
+*****************************
+Design a class that should not support copy construction nor assignment on the class consumer end...
+
+class CA
+{
+private:
+  //  Declare both the copy constructor and assignment function in private
+  CA(const CA& );
+  CA& operator =(const CA& );
+public:
+  //.. all other methods in public
+};
+
+*****************************
+Selective Inheritance. Design a class such that it is derivable only by the class named 'CB' and 'CC' and no other class.
+
+
+class CA   //No single class can derive at this moment....
+{
+private:
+   // place the constructor method in private.
+   CA();
+   //..
+};
+
+/*
+  - As constructor is in private, we cannot create instances of this class outside it's scope. Further at this moment, no  single class would be derivable...
+*/
+
+class CB:public CA  //error
+{..};
+
+class CC:public CA  //error
+{..};
+
+class CD:public CA   //error
+{..};
+
+Solution:---
+
+class CA   //Base class only for 'CB' & 'CC' and no other class
+{
+  friend class CB;
+  friend class CC;
+private:
+   // place the constructor method in private.
+   CA();
+   //...
+};
+
+class CB:public CA  //OK
+{..};
+
+class CC:public CA  //OK
+{..};
+
+class CD:public CA   //error
+{..};
+***************************************************************
+Design a class such that it's heap instances are not allowed.....
+
+Design a class such that it's stack instances are not allowed...
+
+*****************************
+Constructors and destructor behaviour with regard to derived class objects:-
+
+	When a derived class object gets created or constructed, it will only impliciltly call the derived class constructor, whereas
+the base class constructor method must be explicitly called. Thereby we say CONSTRUCTOR methods are not DERIVABLE.
+
+	Similarly, when the derived class object dies or gets destructed, it will only implicitly call the derived class destructor method, where as the base class destructor method must be explicitly called. Thereby we also say DESTRUCTOR methods are not DERIVABLE.
+
+**********************************************************
+
+class circle{....};
+class rectangle{...};
+class triangle{...};
+
+int main()
+{
+  //..
+  circle* c = new(nothrow) circle;
+  graphics(1,c);
+  //..
+  rectangle* r = new(nothrow) rectangle;
+  graphics(2,r);
+
+   //..
+   triangle*t = new(nothrow) triangle;
+   graphics(3,t);
+  return 0;
+}
+
+
+void graphics(circle* p)
+{
+  p->draw();
+  p->resize();
+  //..
+  delete p;
+}
+
+//VERSION - 2
+void graphics(int x, void* p)
+{
+  switch(x)
+  {
+    case 1: circle* c =(circle*)p;
+            //..
+            break;
+    case 2: rectangle* r=(rectangle*)p;
+            //..
+            break;
+    default:
+             //..
+  };
+}
+
+Design a function called COPY, that shall take input from an input-device and re-direct the same to an output-device.
+
+
+STRUCTURED APPROACH - C STYLE:
+
+input-device : keyboard
+output-device : monitor
+
+//version-1
+
+void COPY()
+{
+  char ch;
+  while(ch = keyboard())
+     monitor(ch);
+}
+
+//version-2 [OPTION FOR PRINTER DEVICE ALSO]
+
+enum OUTPUT{PRINTER};
+
+void COPY(OUTPUT device)
+{
+  char ch;
+  while(ch=keyboard())
+  {
+     monitor(ch);
+     if(device == PRINTER)
+             printer(ch);
+  }
+}
+
+
+//version-3 [OPTION FOR PRINTER DEVICE AS WELL AS HARD-DISK]
+
+enum OUTPUT{PRINTER, HDD};
+
+void COPY(OUTPUT device)
+{
+  char ch;
+  while(ch=keyboard())
+  {
+     monitor(ch);
+     if(device == PRINTER)
+             printer(ch);
+     else
+             hdd(ch);
+  }
+}
+
+*********************
+OO APPROACH - C++ STYLE
+
+//ABSTRACT CLASSES
+class InputDevice
+{
+public:
+  virtual char input()=0;
+  //..
+};
+
+class OutputDevice
+{
+public:
+  virtual void print(char)=0;
+};
+
+//Design the COPY function that takes abstract types as its parameter [PROGRAM TO THE ABSTRACTION]
+
+void COPY(InputDevice &device1, OutputDevice& device2)
+{
+  char ch;
+  while(ch = d1.input())
+          d2.print(ch);
+}
+
+class keyboard:public InputDevice
+{
+private:
+  //..
+public:
+  char input()
+  {
+    //...
+  } 
+  /...
+};
+
+class printer:public OutputDevice
+{
+private:
+  //..
+public:
+  void print(char ch){...}
+};
+
+int main()
+{
+   keyboard k1;
+   printer p1;
+   COPY(k1,p1);
+}
+------------------------------------------------------------------
+*********************************************************************
+
+	When a class has one or more virtual member functions, then such a class would be introduced with an invisible pointer field called 'vfptr', also known as 'virtual function pointer', this member will be the first data member of the class.
+
+	The 'vfptr' pointer field is designed to hold the address of VFTABLE.
+
+	The VFTABLE, also called virtual member function table, is an array of function pointers, holding addresses of all those member functions marked as virtual in the class.
+
+	The VFTABLE size will be directly proportional to the number of functions marked as virtual in the class, This table would be residing on the data-segment area of the process memory and would be shared by all objects of the same class kind.
+
+	The size and the layout of the VFTABLE is all conceived by the compiler during COMPILE-TIME itself.
+
+	Any base class member function marked as 'virtual', is also called as OVER-RIDABLE methods...
+
+	If there are member functions in the derived class with same name and signature as that of the base class virtual methods, then these derived class functions are also called as 'OVER-RIDING' methods.
+
+	Classes comprising of OVER-RIDABLE or OVER-RIDING methods are also called as POLYMORPHIC classes.
+
+	If a class has a pure virtual function, then such a member function must and should be over-ridden in the derived class.
+
+	If a class has one or more pure virtual functions, then such a class is also called as ABSTRACT class.
+
+	We cannot create objects of ABSTRACT class.
+
+	If all member functions of class are pure virtual, then such a class is also called as INTERFACE.
+
+	In C++ it is not possible to realize INTERFACE, for the reason the destructor method in C++ cannot be PURE VIRTUAL.
+
+***************************************************
+	The link between the 'vfptr' pointer field of the object and it's corresponding VFTABLE take place during RUN-TIME, this link between the 'vfptr' and the 'VFTABLE is actually called as 
+								RUN-TIME BINDING
+								LATE BINDING
+								DYNAMIC BINDING
+
+		FUNCTION OVERLOADING : COMPILE-TIME POLYMORPHISM
+		FUNCTION OVER-RIDING : RUN-TIME POLYMORPHISM
+
+	Classes whose instances may be created, or creating an instance of that class makes business-sense, then such classes are also called as CONCRETE classes.
+
+	Whenever a CONCRETE act's as BASE kind, then it also leads to another issue called TIGHT-COUPLING problem or TRANSITIVE-DEPENDANCY PROBLEM. Meaning over a period of time when some changes are made to the base concrete class, then it also forces the derived classes for whom no changes have been made to also re-compile and re-build them.
+
+	To overcome TIGHT-COUPLING we need to re-design the code in a such a manner, it is LOOSELY coupled. Meaning, which concrete class under-goes modification, only that class should be re-compiled and re-built. We should not be forced to re-compile those classes for whom no changes have been made.
+
+	In order to address the above 2 issues, we think introducing a new LAYER class. The LAYER class also termed as a GENERALIZED class, should serve as a broad frame-work to the derived classes and also ensure its instances are not allowed.
+
+
+void graphics(circle *);   // 'circle' type is CONCRETE, The function is programmed for IMPLEMENTATION.
+
+void graphics(shape* );   // 'shape' is ABSTRACT type, The function is programmed for ABSTRACTION.
+
+	Program to the ABSTRACTION and not to the IMPLEMENTATION. By doing so we can take care of any implementable type that adds over a period of time.
+
+
+
+
+---------------------------------------------
+CASTING OPERATORS IN C++:-
+	There are 4 casting operators...
+
+1) REINTERPRET_CAST:
+		- A casting operator that can be used to cast a given-type to any other type.
+		- This casting operator is also called as C style casting (or) forced-casting.
+		- As such this casting operator does not have special wisdom or ability to figure whether a given casting
+      attempt being made is right or wrong. It will go-ahead with the casting no matter what. The outcome is
+      our responsibility. Thereby it is also DANGEROUS cast.
+
+		- Use this casting operator only when you are sure about what you are trying to cast.
+
+	Usage:
+		C style:
+		int* a; 
+		double* p;
+		p =(double*)a;
+
+		C++ style
+		p = reinterpret_cast<double*>(a);
+
+	The form of the function...
+		template<typename T1, typename T2> T1 reinterpret_cast(T2 p) {....}
+
+
+
+********************************
+2) STATIC_CAST:
+		- This casting operator can be used on non-polymorphic class object's generally.
+		- Also called safe-cast or compile-time cast.
+		- Called safe for the reason, he will go-ahead with the casting subject the casting is valid, else issue
+                  a compile-time error.
+		- Supports both DOWN-CASTING as well as UP-CASTING [two-way casting operator]
+
+			DOWN-CASTING: In a class heirarchy... Converting a Base type to its derived type
+
+			UP-CASTING: Converting a derived kind to its base kind.
+
+***************************************
+3) DYNAMIC_CAST:
+		- This casting operator can be used only on POLYMORPHIC class instances, and no other types.
+		- Also called safe-cast, as he would go-ahead with cast only the casting is valid, else would return NULL.
+		- Also called RUN-TIME cast, because the casting operator has a special ability to probe and resolve the exact
+                  derived on instances which get created during run-time.
+		- Supports only DOWN-CASTING [one-way cast]
+***************************************
+4) CONST_CAST:
+		- This casting operator can be applied on 'const objects', in order to remove the constness of the object.
+		- By doing so, it should now be possible for read-only object to act as read-write object.
+		- The success of this casting operator is not guaranteed on all platforms.
+		- If we developers want to be sure about modifying the contents of a const object, then prefer 'mutable'
+                  qualifier, success will be guaranteed on all platforms.
+
+----------------------------------------------------------------------
+EXCEPTION HANDLING in C++:-
+	A feature in-corporated into the program code, so as to ensure there is a graceful termination of the application, whether the application during its execution completed its desired task as expected or not.
+
+	By graceful termination we mean, applications entry-point should also be the exit-point.
+
+	Any executable statement [expression or a function-call statement] is a candidate for an exception, then such statements must we wrapped in a block called 'try'. Immediately foll. the 'try' block, we cannot any other statement(s), other than 'catch' block.
+
+	If an exception takes place, the control is likely to passed to a suitable catch-block.
+
+
+
+int main()
+{
+  try
+  {
+    CA* p = new CA;
+    //statements to be executed upon successful allocation here...
+    //...
+  }
+  catch(bad_alloc &x)  //allocation fails, it comes here..
+  {
+    cout << x.what();
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
